@@ -60,3 +60,4 @@ Abra o **Google Docs**, vá até **"Assinatura Digital" → "Assinar Documento"*
 
 ---
 
+# appsscriptsignaturedocs
