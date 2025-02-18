@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>Assinatura Digital</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+</head>
+
+<body class="has-background-grey-lighter p-4">
+  <div class="box">
+    <h2 class="title is-2">Assinatura Digital</h2>
+    <canvas id="signature-pad" width="300" height="150" class="border"></canvas><br>
+    <div class="mt-4">
+      <button id="clear" class="button is-danger">Limpar</button>
+      <button id="sign" class="button is-info">Assinar</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('signature-pad');
+    const clearButton = document.getElementById('clear');
+    const signButton = document.getElementById('sign');
+
+    const signaturePad = new SignaturePad(canvas, {
+      minWidth: 5,
+      maxWidth: 10,
+      penColor: "#000",
+      backgroundColor: "#fff"
+    });
+
+    clearButton.addEventListener('click', () => {
+      signaturePad.clear();
+    });
+
+    signButton.addEventListener('click', () => {
+      if (signaturePad.isEmpty()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Atenção!',
+          text: 'Por favor, assine antes de assinar o documento.'
+        });
+        return;
+      }
+
+      const dataURL = signaturePad.toDataURL('image/png');
+
+      // 🔹 Bloqueia os botões e ativa o spinner
+      signButton.classList.add('is-loading');
+      signButton.disabled = true;
+      clearButton.disabled = true;
+
+      google.script.run
+        .withFailureHandler(error => {
+          console.error("Erro ao salvar assinatura:", error);
+
+          // 🔹 Remove o spinner e reativa os botões em caso de erro
+          signButton.classList.remove('is-loading');
+          signButton.disabled = false;
+          clearButton.disabled = false;
+
+          Swal.fire({
+            title: 'Erro!',
+            text: error.message,
+            icon: 'error',
+            confirmButtonText: 'Ok'
+          });
+        })
+        .withSuccessHandler(() => {
+          // 🔹 Agora insere a assinatura
+          google.script.run
+            .withFailureHandler(error => {
+              console.error("Erro ao inserir assinatura:", error);
+
+              // 🔹 Remove o spinner e reativa os botões em caso de erro
+              signButton.classList.remove('is-loading');
+              signButton.disabled = false;
+              clearButton.disabled = false;
+
+              Swal.fire({
+                title: 'Erro!',
+                text: error.message,
+                icon: 'error',
+                confirmButtonText: 'Ok'
+              });
+            })
+            .withSuccessHandler(() => {
+              // 🔹 Remove o spinner antes da mensagem aparecer
+              signButton.classList.remove('is-loading');
+              signButton.disabled = false;
+              clearButton.disabled = false;
+
+              // 🔹 Exibe a mensagem de sucesso
+              Swal.fire({
+                title: 'Sucesso!',
+                text: 'Documento assinado e salvo.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+              }).then(() => {
+                google.script.run.closeModal();
+                signaturePad.clear();
+              });
+            })
+            .insertSignature();
+        })
+        .signDocument(dataURL);
+    });
+  </script>
+</body>
+</html>
+
+

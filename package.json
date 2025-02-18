@@ -1,0 +1,21 @@
+{
+  "name": "assinaturadocs",
+  "version": "1.0.0",
+  "description": "Assinatura no google docs com apps script",
+  "main": "index.js",
+  "scripts": {
+    "login": "clasp login",
+    "clone": "clasp clone 1FDKOaDFds5ewlRthJn3lH6q2CxTQi-LwYnskdgilsqBttDU-O8B0xJV_ --rootDir apps",
+    "logout": "clasp logout",
+    "pull": "clasp pull",
+    "push": "clasp push",
+    "push-w": "clasp push --watch"
+  },
+
+  "author": "maia emerson",
+  "license": "ISC",
+  "devDependencies": {
+    "@google/clasp": "^2.5.0",
+    "@types/google-apps-script": "^1.0.96"
+  }
+}
